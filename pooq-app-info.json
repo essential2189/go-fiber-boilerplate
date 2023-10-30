@@ -1,0 +1,5 @@
+{
+  "domains": "apis.local.wavve.com,wavve-apis",
+  "uris": "",
+  "methods": "GET,DELETE,POST,PUT"
+}

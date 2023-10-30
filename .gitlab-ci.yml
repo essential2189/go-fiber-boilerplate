@@ -1,0 +1,197 @@
+# wavve에서는 기본적으로 dind 방식의 빌드 & 배포를 사용합니다.
+# dind 방식을 사용한다는 선언문입니다.
+.docker_job_template: &dind_job
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+# gitlab 배포가 동작할 단계(stages)를 설정합니다.
+stages:
+  - build # 소스를 컴파일하고 docker 이미지를 만드는 단계
+  - release # 만들어진 이미지를 gitlab registery에 등록하는 단계
+  - staging # dev에 배포하는 단계
+  - create_canary # PRD에 canary를 배포하는 단계
+  - delete_canary # PRD에 배포된 canary를 삭제하는 단계
+  - deploy # PRD에 배포하는 단계
+
+# gitlab pipe 라인에 사용할 때 사용되는 변수
+variables:
+  DOCKER_DRIVER: overlay2 # 빌드되는 docker 이미지에 사용하는 네트워크 설정
+  COMMIT_IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA # gitlab register에 등록하는 이미지 명칭을 정의
+  LATEST_IMAGE_TAG: $CI_REGISTRY_IMAGE:latest # gitlab register 최종 사용되는 이미지에 설정하는 tag
+
+# build stage에서 동작하는 명령어를 선언
+# only 부분은 해당 branch에서만 동작시키겠다는 제한문
+build_image:
+  <<: *dind_job
+  stage: build
+  script:
+    - docker build --build-arg GITLAB_USER=gitlab-ci-token --build-arg GITLAB_PASSWORD=$CI_JOB_TOKEN -t $COMMIT_IMAGE_TAG .
+    - docker push $COMMIT_IMAGE_TAG
+  only:
+    - dev
+    - stg-hfix
+    - qa
+    - stg-spt
+    - release
+
+# release stage에서 동작하는 명령어를 선언
+# only 부분은 해당 branch에서만 동작시키겠다는 제한문
+# release branch 동작 시, 배포되는 docker 이미지에 latest tag 선언
+release-image:
+  <<: *dind_job
+  stage: release
+  script:
+    - docker pull $COMMIT_IMAGE_TAG
+    - docker tag $COMMIT_IMAGE_TAG $LATEST_IMAGE_TAG
+    - docker push $LATEST_IMAGE_TAG
+  only:
+    - release
+
+# staging stage에서 동작하는 명령어를 선언
+# 개발 배포에 사용하는 선언
+# when: manual이 선언되지 않았기 때문에 해당 branch에 commit/push 시 자동 배포됨
+# only에 stg-hfix/dev를 선언해야하며, stg-hfix는 더 이상 사용되지 않을 예정으로 dev branch로 마이그레이션 필요
+# -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA 삭제 가능
+deploy-to-k8s-dev:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: staging
+  script:
+    - /deployapp/pooq3_ms_deploy.py -e dev -n $CI_PROJECT_NAME -f pooq-app-info.json -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA
+  only:
+    - stg-hfix
+    - dev
+
+# staging stage에서 동작하는 명령어를 선언
+# 개발 배포에 사용하는 선언
+# 강제 배포가 필요한 경우에만 사용 when: manual을 선언하여 pipeline에서 수동 배포해야함
+# only에 stg-hfix/dev를 선언해야하며, stg-hfix는 더 이상 사용되지 않을 예정으로 dev branch로 마이그레이션 필요
+# -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA 삭제 가능
+deploy-to-k8s-dev-force:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: staging
+  script:
+    - /deployapp/pooq3_ms_deploy.py -e dev -n $CI_PROJECT_NAME -f pooq-app-info.json -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA --force yes
+  only:
+    - stg-hfix
+    - dev
+  when: manual
+
+# stg-spt 환경은 fade-out 예정입니다.
+# -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA 삭제 가능
+deploy-to-k8s-stgspt:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: staging
+  script:
+    - /deployapp/pooq3_ms_deploy.py -e stg-spt -n $CI_PROJECT_NAME -f pooq-app-info.json -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA
+  only:
+    - stg-spt
+  when: manual
+
+# stg-spt 환경은 fade-out 예정입니다.
+# -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA 삭제 가능
+deploy-to-k8s-stgspt-force:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: staging
+  script:
+    - /deployapp/pooq3_ms_deploy.py -e stg-spt -n $CI_PROJECT_NAME -f pooq-app-info.json -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA --force yes
+  only:
+    - stg-spt
+  when: manual
+
+# staging stage에서 동작하는 명령어를 선언
+# 개발 배포에 사용하는 선언
+# when: manual을 선언하여 pipeline에서 수동 배포해야함
+# only에 release를 선언해야하며, release branch에 적용됨
+# -e $CI_COMMIT_REF_NAME를 -e qa로 수정
+# QA 배포는 배포자가 제한됨
+# -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA 삭제 가능
+deploy-to-k8s-qa-cbt:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: staging
+  script:
+    - /deployapp/pooq3_ms_deploy.py -e qa -n $CI_PROJECT_NAME -f pooq-app-info.json -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA
+  only:
+    - qa
+  when: manual
+
+# staging stage에서 동작하는 명령어를 선언
+# 개발 배포에 사용하는 선언
+# 강제 배포가 필요한 경우에만 사용
+# when: manual을 선언하여 pipeline에서 수동 배포해야함
+# only에 release를 선언해야하며, release branch에 적용됨
+# -e $CI_COMMIT_REF_NAME를 -e qa로 수정
+# QA 배포는 배포자가 제한됨
+# -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA 삭제 가능
+deploy-to-k8s-qa-cbt-force:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: staging
+  script:
+    - /deployapp/pooq3_ms_deploy.py -e qa -n $CI_PROJECT_NAME -f pooq-app-info.json -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA --force yes
+  only:
+    - qa
+  when: manual
+
+# create_canary stage에서 동작하는 명령어를 선언 / canary를 배포를 선언
+# PRD 배포에 사용하는 선언
+# when: manual을 선언하여 pipeline에서 수동 배포해야함
+# only에 release를 선언해야하며, release branch에 적용됨
+# PRD 배포는 배포자가 제한됨
+create-canary-to-k8s-prd:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: create_canary
+  script:
+    - /deployapp/pooq3_canary_deploy.py -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA -c create
+  only:
+    - release
+  when: manual
+
+# delete_canary stage에서 동작하는 명령어를 선언 / 배포된 canary를 삭제 선언
+# PRD 배포에 사용하는 선언
+# when: manual을 선언하여 pipeline에서 수동 배포해야함
+# only에 release를 선언해야하며, release branch에 적용됨
+# PRD 배포는 배포자가 제한됨
+delete-canary-to-k8s-prd:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: delete_canary
+  script:
+    - /deployapp/pooq3_canary_deploy.py -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA -c delete
+  only:
+    - release
+  when: manual
+
+# deploy stage에서 동작하는 명령어를 선언
+# PRD 배포에 사용하는 선언
+# when: manual을 선언하여 pipeline에서 수동 배포해야함
+# only에 release를 선언해야하며, release branch에 적용됨
+# -e $CI_COMMIT_REF_NAME를 -e release로 수정
+# PRD 배포는 배포자가 제한됨
+# -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA 삭제 가능
+deploy-to-k8s-prd:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: deploy
+  script:
+    - /deployapp/pooq3_ms_deploy.py -e release -n $CI_PROJECT_NAME -f pooq-app-info.json -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA
+  only:
+    - release
+  when: manual
+
+
+# deploy stage에서 동작하는 명령어를 선언
+# PRD 배포에 사용하는 선언
+# 강제 배포가 필요한 경우에만 사용
+# when: manual을 선언하여 pipeline에서 수동 배포해야함
+# only에 release를 선언해야하며, release branch에 적용됨
+# -e $CI_COMMIT_REF_NAME를 -e release로 수정
+# PRD 배포는 배포자가 제한됨
+# -n $CI_PROJECT_NAME -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA 삭제 가능
+deploy-to-k8s-prd-force:
+  image: gitlab-registry.wavve.com/pooq-system/pooq3-ms-deploy:latest
+  stage: deploy
+  script:
+    - /deployapp/pooq3_ms_deploy.py -e release -n $CI_PROJECT_NAME -f pooq-app-info.json -i $CI_REGISTRY_IMAGE -v $CI_COMMIT_SHA --force yes
+  only:
+    - release
+  when: manual

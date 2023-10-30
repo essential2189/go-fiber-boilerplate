@@ -1,0 +1,30 @@
+db:
+  user: product
+  password: 'Q]iZln3j5]c#)s'
+  source_addrs:
+    - 'dev-product-mariadb-101.local.wavve.com:3306'
+  replica_addrs:
+    - 'dev-product-mariadb-102.local.wavve.com:3306'
+    - 'dev-product-mariadb-103.local.wavve.com:3306'
+    - 'dev-product-mariadb-104.local.wavve.com:3306'
+    - 'dev-product-mariadb-106.local.wavve.com:3306'
+    - 'dev-product-mariadb-106.local.wavve.com:3306'
+  dbname: product
+
+redis:
+  master_name: 'billing-redis-sentinel'
+  sentiel_addrs:
+    - 'qa-billing-redis-101.local.wavve.com:26379'
+    - 'qa-billing-redis-102.local.wavve.com:26379'
+    - 'qa-billing-redis-103.local.wavve.com:26379'
+
+kafka:
+  version: 2.3.1
+  brokers:
+    - 'dev-kafka-partner-01.local.wavve.com:9092'
+    - 'dev-kafka-partner-02.local.wavve.com:9092'
+    - 'dev-kafka-partner-03.local.wavve.com:9092'
+  group: product-admin
+  topics:
+    - dev.product-admin.event.v1
+

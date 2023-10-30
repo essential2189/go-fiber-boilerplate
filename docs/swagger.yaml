@@ -1,0 +1,13 @@
+consumes:
+- application/json
+host: localhost:8080
+info:
+  contact:
+    email: product.domain.tech@wavve.com
+    name: 프로덕트 도메인
+  title: go-boilerplate API
+  version: "1.0"
+paths: {}
+produces:
+- application/json
+swagger: "2.0"
