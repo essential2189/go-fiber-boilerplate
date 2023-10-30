@@ -1,8 +1,5 @@
 # go-boilerplate v1.0.0
 
-**[Confluence](https://contentwavve.atlassian.net/wiki/spaces/SHOP/pages/1300332546
-)**
-
 go version - 1.2.1
 
 ### Must Changed Before Use
