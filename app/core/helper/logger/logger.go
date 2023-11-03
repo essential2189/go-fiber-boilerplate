@@ -5,36 +5,30 @@ import (
 	"go-boilerplate/config"
 	"log"
 	"os"
-	"sync"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-const (
-	historyType = "history-store"
-	version     = "1.0.0"
-)
-
-var once sync.Once
-
 type Sugared struct {
 	*zap.SugaredLogger
 }
 
-var instance *Sugared
+var Zap *Sugared
 
-// Get initializes a zap.Logger instance if it has not been initialized
-// already and returns the same instance for subsequent calls.
-func Get() *Sugared {
-	once.Do(func() {
-		instance = New()
-	})
-
-	return instance
-}
+// Get initializes a zap.Logger Zap if it has not been initialized
+// already and returns the same Zap for subsequent calls.
+//func Get() *Sugared {
+//	once.Do(func() {
+//		Zap = New()
+//	})
+//
+//	return Zap
+//}
 
 func New() *Sugared {
+	conf, _ := config.NewConfig(config.NewVars())
+
 	level := zap.InfoLevel
 	if config.LogLevel != "" {
 		levelFromEnv, err := zapcore.ParseLevel(config.LogLevel)
@@ -66,7 +60,7 @@ func New() *Sugared {
 	encoderConfig.CallerKey = "caller"
 	encoderConfig.EncodeCaller = zapcore.ShortCallerEncoder
 
-	config := zap.Config{
+	zapConfig := zap.Config{
 		Level:             zap.NewAtomicLevelAt(level),
 		Development:       false,
 		DisableCaller:     false,
@@ -81,16 +75,16 @@ func New() *Sugared {
 			"stderr",
 		},
 		InitialFields: map[string]interface{}{
-			"type":    historyType,
-			"version": version,
+			"type":    conf.Log.HistoryType,
+			"version": conf.Log.Version,
 		},
 	}
 
-	instance = &Sugared{
-		zap.Must(config.Build()).Sugar(),
+	Zap = &Sugared{
+		zap.Must(zapConfig.Build()).Sugar(),
 	}
 
-	return instance
+	return Zap
 }
 
 func (l *Sugared) Printf(format string, args ...interface{}) {

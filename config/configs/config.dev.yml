@@ -1,30 +1,27 @@
+log:
+  history_type: 'history-go-boilerplate'
+  version: '1.0.0'
+
 db:
-  user: product
-  password: 'Q]iZln3j5]c#)s'
+  user: billing
+  password: '1]tHj}X,gqn]w6'
   source_addrs:
-    - 'dev-product-mariadb-101.local.wavve.com:3306'
-  replica_addrs:
-    - 'dev-product-mariadb-102.local.wavve.com:3306'
-    - 'dev-product-mariadb-103.local.wavve.com:3306'
-    - 'dev-product-mariadb-104.local.wavve.com:3306'
-    - 'dev-product-mariadb-106.local.wavve.com:3306'
-    - 'dev-product-mariadb-106.local.wavve.com:3306'
-  dbname: product
+    - 'dev-billing-mariadb-101.local.wavve.com:3306'
+    - 'dev-billing-mariadb-102.local.wavve.com:3306'
+  dbname: billing
 
 redis:
-  master_name: 'billing-redis-sentinel'
+  master_name: 'billing-kafka-sentinel'
   sentiel_addrs:
-    - 'qa-billing-redis-101.local.wavve.com:26379'
-    - 'qa-billing-redis-102.local.wavve.com:26379'
-    - 'qa-billing-redis-103.local.wavve.com:26379'
+    - 'dev-billing-kafka-101.local.wavve.com:26379'
+    - 'dev-billing-kafka-102.local.wavve.com:26379'
+    - 'dev-billing-kafka-103.local.wavve.com:26379'
 
 kafka:
-  version: 2.3.1
-  brokers:
-    - 'dev-kafka-partner-01.local.wavve.com:9092'
-    - 'dev-kafka-partner-02.local.wavve.com:9092'
-    - 'dev-kafka-partner-03.local.wavve.com:9092'
-  group: product-admin
-  topics:
-    - dev.product-admin.event.v1
+  broker:
+    - 'dev-kafka-product-01.local.wavve.com:9092'
+    - 'dev-kafka-product-02.local.wavve.com:9092'
+    - 'dev-kafka-product-03.local.wavve.com:9092'
 
+sentry:
+  dsn: ''

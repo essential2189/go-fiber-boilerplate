@@ -3,6 +3,7 @@ package controller
 import (
 	"go-boilerplate/app"
 	"go-boilerplate/app/core/consts"
+	"go-boilerplate/app/core/helper"
 	"go-boilerplate/app/core/helper/logger"
 	"go-boilerplate/app/core/helper/resty"
 	"net/http"
@@ -17,12 +18,12 @@ type Controller interface {
 }
 
 type controller struct {
-	resty *resty.HttpClient
+	helper helper.Helper
 }
 
-func NewController(resty *resty.HttpClient) Controller {
+func NewController(h helper.Helper) Controller {
 	return controller{
-		resty: resty,
+		helper: h,
 	}
 }
 
@@ -31,8 +32,6 @@ func (ctrl controller) Table() []app.Mapping {
 		{fiber.MethodGet, "/temp", ctrl.Temp},
 	}
 }
-
-var log = logger.Get()
 
 func (ctrl controller) Temp(c *fiber.Ctx) error {
 	requestInfo := resty.RequestInfo{
@@ -46,8 +45,8 @@ func (ctrl controller) Temp(c *fiber.Ctx) error {
 		RetryBackOff: 0,
 		IsSkipSSL:    false,
 	}
-	res, _ := ctrl.resty.Request(requestInfo)
+	res, _ := ctrl.helper.Resty.Request(requestInfo)
 
-	log.Info("res: " + strconv.Itoa(res.StatusCode))
+	logger.Zap.Infof("res: " + strconv.Itoa(res.StatusCode))
 	return c.SendStatus(http.StatusOK)
 }

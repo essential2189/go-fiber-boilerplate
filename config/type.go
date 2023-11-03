@@ -1,10 +1,16 @@
 package config
 
 type Config struct {
+	Log    Log    `mapstructure:"log"`
 	DB     DB     `mapstructure:"db"`
-	Redis  Redis  `mapstructure:"redis"`
 	Kafka  Kafka  `mapstructure:"kafka"`
+	Redis  Redis  `mapstructure:"kafka"`
 	Sentry Sentry `mapstructure:"sentry"`
+}
+
+type Log struct {
+	HistoryType string `mapstructure:"history_type"`
+	Version     string `mapstructure:"version"`
 }
 
 type DB struct {
@@ -19,11 +25,9 @@ type Redis struct {
 	MasterName    string   `mapstructure:"master_name"`
 	SentinelAddrs []string `mapstructure:"sentiel_addrs"`
 }
+
 type Kafka struct {
-	Version string   `mapstructure:"version"`
-	Brokers []string `mapstructure:"brokers"`
-	Group   string   `mapstructure:"group"`
-	Topics  []string `mapstructure:"topics"`
+	Broker []string `mapstructure:"broker"`
 }
 
 type Sentry struct {

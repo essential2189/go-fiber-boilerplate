@@ -70,7 +70,7 @@ type Config struct {
 	Levels []zapcore.Level
 }
 
-// Use zap.NewProduction() as default logging instance.
+// Use zap.NewProduction() as default logging Zap.
 var l, _ = zap.NewProduction()
 
 // ConfigDefault is the default config

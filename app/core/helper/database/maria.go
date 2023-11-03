@@ -15,8 +15,6 @@ import (
 	"gorm.io/plugin/dbresolver"
 )
 
-var log = logger.Get()
-
 // NewMaria opens a database connection.
 func NewMaria(config *config.Config) *gorm.DB {
 	gormConfig := newGormConfig()
@@ -24,19 +22,19 @@ func NewMaria(config *config.Config) *gorm.DB {
 
 	db, err := gorm.Open(sources[0], gormConfig)
 	if err != nil {
-		log.Fatalf("failed to connect to database : %+v", err)
+		logger.Zap.Fatalf("failed to connect to database : %+v", err)
 	}
 	err = db.Use(getDBResolver(sources, replicas))
 	if err != nil {
-		log.Fatalf("failed to set dbresolver : %+v", err)
+		logger.Zap.Fatalf("failed to set dbresolver : %+v", err)
 	}
 
 	err = checkConnection(db)
 	if err != nil {
-		log.Fatalf("failed to check connection: %+v", err)
+		logger.Zap.Fatalf("failed to check connection: %+v", err)
 	}
 
-	log.Info("DB connected")
+	logger.Zap.Info("DB connected")
 
 	return db
 }
@@ -90,7 +88,7 @@ func newGormConfig() *gorm.Config {
 // newLogger returns a new gorm/logger.Interface.
 func newLogger() gormLogger.Interface {
 	return gormLogger.New(
-		log,
+		logger.Zap,
 		gormLogger.Config{
 			SlowThreshold:             time.Second,   // Slow SQL threshold
 			LogLevel:                  getLogLevel(), // Log level

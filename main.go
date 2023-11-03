@@ -3,6 +3,7 @@ package main
 import (
 	"go-boilerplate/app"
 	"go-boilerplate/app/core/helper"
+	"go-boilerplate/app/core/helper/logger"
 	"go-boilerplate/app/domain/temp"
 	"go-boilerplate/config"
 
@@ -22,6 +23,7 @@ func main() {
 		temp.ControllerModule,
 		temp.ServiceModule,
 		temp.RepositoryModule,
+
 		config.Module,
 		helper.Module,
 		fx.Provide(
@@ -32,6 +34,7 @@ func main() {
 			),
 		),
 		fx.Invoke(
+			func(*logger.Sugared) {},
 			func(fiber.Router) {},
 			func(*fiber.App) {},
 		),

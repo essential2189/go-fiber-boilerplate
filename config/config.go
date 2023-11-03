@@ -33,6 +33,7 @@ var (
 	Port     string
 	Test     bool
 	LogLevel string
+	Apis     string
 )
 
 func init() {
@@ -54,6 +55,15 @@ func init() {
 	Test = os.Getenv("TEST") == "true"
 
 	LogLevel = os.Getenv("LOG_LEVEL")
+
+	if Profile == "prd" {
+		Apis = "http://apis.local.wavve.com/"
+	} else if Profile == "qa" {
+		Apis = "http://qa-apis.wavve.com/"
+	} else {
+		//Apis = "http://dev-apis.wavve.com/"
+		Apis = "http://apis.local.wavve.com/"
+	}
 }
 
 type Vars struct {
@@ -62,6 +72,7 @@ type Vars struct {
 	Port     string
 	Test     bool
 	LogLevel string
+	Apis     string
 }
 
 func NewVars() *Vars {
@@ -71,5 +82,6 @@ func NewVars() *Vars {
 		Port:     Port,
 		Test:     Test,
 		LogLevel: LogLevel,
+		Apis:     Apis,
 	}
 }

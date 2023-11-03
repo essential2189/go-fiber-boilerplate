@@ -9,8 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var log = logger.Get()
-
 func ErrorHandler(c *fiber.Ctx, originErr error) error {
 	// Status code defaults to 500
 	code := fiber.StatusInternalServerError
@@ -27,9 +25,9 @@ func ErrorHandler(c *fiber.Ctx, originErr error) error {
 	}
 
 	if code >= 400 {
-		log.Errorf("%+v", originErr)
+		logger.Zap.Errorf("%+v", originErr)
 	} else {
-		log.Infof("%+v", originErr)
+		logger.Zap.Infof("%+v", originErr)
 	}
 
 	if r := recover(); r != nil {

@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"go-boilerplate/app/core/helper/logger"
 	"go-boilerplate/config"
 
 	"github.com/redis/go-redis/v9"
@@ -17,7 +18,7 @@ func NewRedis(config *config.Config) *redis.Client {
 
 	_, err := conn.Ping(ctx).Result()
 	if err != nil {
-		log.Panicf("Failed to %v client connection. (%v)", c.MasterName, err)
+		logger.Zap.Panicf("Failed to %v client connection. (%v)", c.MasterName, err)
 	}
 
 	/* For API Caching */

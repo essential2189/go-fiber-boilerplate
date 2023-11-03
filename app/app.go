@@ -16,15 +16,13 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var log = logger.Get()
-
 // NewFiber create a new Fiber application
 func NewFiber(lc fx.Lifecycle) *fiber.App {
 	app := initializeFiber()
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Infof("Server is starting on port: %s", config.Port)
+			logger.Zap.Infof("Server is starting on port: %s", config.Port)
 
 			addr := fmt.Sprintf(":%s", config.Port)
 			go app.Listen(addr)
@@ -61,7 +59,7 @@ func setMiddleware(app *fiber.App) *fiber.App {
 	}))
 	app.Use(logger.NewMiddleware(logger.Config{
 		SkipURIs: []string{"/check_health"},
-		Logger:   log.Desugar(),
+		Logger:   logger.Zap.Desugar(),
 		Fields: []string{
 			logger.RequestID,
 			logger.Status,

@@ -1,6 +1,7 @@
 package database
 
 import (
+	"go-boilerplate/app/core/helper/logger"
 	"go-boilerplate/config"
 	"os"
 	"os/signal"
@@ -22,9 +23,9 @@ func NewKafkaProducer(config *config.Config) *Producer {
 	conf.Producer.RequiredAcks = sarama.WaitForLocal
 	conf.Producer.Compression = sarama.CompressionNone // CHECK 관련 여쭤보기
 	conf.Producer.Partitioner = sarama.NewRoundRobinPartitioner
-	async, err := sarama.NewAsyncProducer(config.Kafka.Brokers, conf)
+	async, err := sarama.NewAsyncProducer(config.Kafka.Broker, conf)
 	if err != nil {
-		log.Fatalf("NewKafkaProducer NewAsyncProducer error %v", err)
+		logger.Zap.Fatalf("NewKafkaProducer NewAsyncProducer error %v", err)
 	}
 
 	syncConf := sarama.NewConfig()
@@ -32,9 +33,9 @@ func NewKafkaProducer(config *config.Config) *Producer {
 	syncConf.Version = sarama.V0_11_0_0
 	syncConf.Producer.Retry.Max = 3
 	syncConf.Producer.Partitioner = sarama.NewRoundRobinPartitioner
-	sync, err := sarama.NewSyncProducer(config.Kafka.Brokers, syncConf)
+	sync, err := sarama.NewSyncProducer(config.Kafka.Broker, syncConf)
 	if err != nil {
-		log.Fatalf("NewKafkaProducer NewSyncProducer error %v", err)
+		logger.Zap.Fatalf("NewKafkaProducer NewSyncProducer error %v", err)
 	}
 
 	mostOnceConf := sarama.NewConfig()
@@ -42,9 +43,9 @@ func NewKafkaProducer(config *config.Config) *Producer {
 	mostOnceConf.Producer.Return.Successes = false
 	mostOnceConf.Producer.Return.Errors = false
 	mostOnceConf.Producer.RequiredAcks = sarama.NoResponse
-	mostOnce, err := sarama.NewAsyncProducer(config.Kafka.Brokers, mostOnceConf)
+	mostOnce, err := sarama.NewAsyncProducer(config.Kafka.Broker, mostOnceConf)
 	if err != nil {
-		log.Fatalf("NewKafkaProducer MostOnceProducer error %v", err)
+		logger.Zap.Fatalf("NewKafkaProducer MostOnceProducer error %v", err)
 	}
 
 	producer := &Producer{
@@ -60,19 +61,19 @@ func NewKafkaProducer(config *config.Config) *Producer {
 	go func() {
 		select {
 		case err := <-producer.MostOnceProducer.Errors():
-			log.Errorf("kafka write error: %+v", err)
+			logger.Zap.Errorf("kafka write error: %+v", err)
 		case err := <-producer.AsyncProducer.Errors():
-			log.Errorf("kafka write error: %+v", err)
+			logger.Zap.Errorf("kafka write error: %+v", err)
 		case osSignal := <-producer.Signal:
 			if err := producer.AsyncProducer.Close(); err != nil {
-				log.Errorf("kafka close error: %+v", err)
+				logger.Zap.Errorf("kafka close error: %+v", err)
 			}
-			log.Errorf("os signal occurrence: %+v", osSignal)
+			logger.Zap.Errorf("os signal occurrence: %+v", osSignal)
 
 			if err := producer.MostOnceProducer.Close(); err != nil {
-				log.Errorf("kafka close error: %+v", err)
+				logger.Zap.Errorf("kafka close error: %+v", err)
 			}
-			log.Errorf("os signal occurrence: %+v", osSignal)
+			logger.Zap.Errorf("os signal occurrence: %+v", osSignal)
 			break
 		}
 	}()
