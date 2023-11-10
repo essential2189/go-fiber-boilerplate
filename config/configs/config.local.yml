@@ -1,0 +1,21 @@
+log:
+  history_type: 'history-go-boilerplate'
+  version: '1.0.0'
+db:
+  user:
+  password: ''
+  source_addrs:
+    - ''
+  dbname: local
+
+redis:
+  master_name: ''
+  sentiel_addrs:
+    - ''
+
+kafka:
+  broker:
+    - ''
+
+sentry:
+  dsn: ''

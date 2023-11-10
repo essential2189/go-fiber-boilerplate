@@ -1,7 +1,4 @@
-# go-boilerplate v1.0.0
-
-**[Confluence](https://contentwavve.atlassian.net/wiki/spaces/SHOP/pages/1300332546
-)**
+# go-boilerplate v1.1.1
 
 go version - 1.2.1
 
