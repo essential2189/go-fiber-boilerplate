@@ -10,7 +10,7 @@ import (
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
 	code := fiber.StatusInternalServerError
-	message := "Internal Server Error"
+	message := err.Error()
 	var data interface{}
 
 	var customError *Error
