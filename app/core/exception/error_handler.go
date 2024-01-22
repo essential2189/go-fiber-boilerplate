@@ -9,18 +9,30 @@ import (
 )
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
-	code := fiber.StatusInternalServerError
-	message := err.Error()
-	var data interface{}
+	c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
 
-	var customError *Error
-	ok := errors.As(err, &customError)
-	if ok {
-		code, _ = strconv.Atoi(strings.Split(string(customError.Code), ".")[0])
-		message = ErrorMessage()(customError.Code)
-		data = customError.Data
+	const defaultErrorCode = fiber.StatusInternalServerError
+	const defaultErrorMessage = "Internal Server Error"
+
+	extractStatusCode := func(customError *Error) int {
+		parts := strings.Split(string(customError.Code), ".")
+		if len(parts) > 0 {
+			if code, err := strconv.Atoi(parts[0]); err == nil {
+				return code
+			}
+		}
+		return defaultErrorCode
 	}
 
-	c.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
-	return c.Status(code).JSON(fiber.Map{"error": code, "message": message, "data": data})
+	var customError *Error
+	if errors.As(err, &customError) {
+		code := extractStatusCode(customError)
+		return c.Status(code).JSON(customError)
+	}
+
+	return c.Status(defaultErrorCode).JSON(fiber.Map{
+		"code":  defaultErrorCode,
+		"error": defaultErrorMessage,
+		"data":  nil,
+	})
 }
