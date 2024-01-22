@@ -10,7 +10,6 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
 	"go.uber.org/fx"
@@ -47,13 +46,19 @@ func initializeFiber() *fiber.App {
 		UnescapePath:  true,  // url decoded path, ctx.Params(%key%)
 		ErrorHandler:  exception.ErrorHandler,
 	})
+
+	app.Get("/check_health", func(ctx *fiber.Ctx) error {
+		return ctx.SendStatus(http.StatusOK)
+	})
+	app.Get("/swagger/*", swagger.HandlerDefault)
+
 	app = setMiddleware(app)
 
 	return app
 }
 
 func setMiddleware(app *fiber.App) *fiber.App {
-	app.Use(recover.New())
+	app.Use(exception.Recover())
 	app.Use(cors.New())
 	// Set request ID
 	app.Use(requestid.New(requestid.Config{
@@ -78,10 +83,6 @@ func setMiddleware(app *fiber.App) *fiber.App {
 		},
 		Levels: []zapcore.Level{zapcore.ErrorLevel, zapcore.ErrorLevel, zapcore.InfoLevel},
 	}))
-	app.Get("/check_health", func(ctx *fiber.Ctx) error {
-		return ctx.SendStatus(http.StatusOK)
-	})
-	app.Get("/swagger/*", swagger.HandlerDefault)
 
 	return app
 }
