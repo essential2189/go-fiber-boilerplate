@@ -3,6 +3,7 @@ package temp
 import (
 	"go-boilerplate/app"
 	"go-boilerplate/app/domain/temp/controller"
+	"go-boilerplate/app/domain/temp/service"
 
 	"go.uber.org/fx"
 )
@@ -10,20 +11,13 @@ import (
 var ControllerModule = fx.Module(
 	"controller",
 	fx.Provide(
-		app.AsRoute(controller.NewController),
+		app.AsRoute(controller.NewTempController),
 	),
 )
 
 var ServiceModule = fx.Module(
 	"service",
 	fx.Provide(
-	//TempService,
-	),
-)
-
-var RepositoryModule = fx.Module(
-	"repository",
-	fx.Provide(
-	//TempRepository,
+		service.NewTempService,
 	),
 )

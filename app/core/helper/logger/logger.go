@@ -44,7 +44,7 @@ func New() *Sugared {
 	var encoderConfig zapcore.EncoderConfig
 	var encoding string
 
-	if os.Getenv("wavve_env") == "prd" {
+	if os.Getenv("env") == "prd" {
 		encoderConfig = zap.NewProductionEncoderConfig()
 		encoding = "json"
 	} else {
@@ -75,8 +75,8 @@ func New() *Sugared {
 			"stderr",
 		},
 		InitialFields: map[string]interface{}{
-			"type":    conf.Log.HistoryType,
-			"version": conf.Log.Version,
+			"type":    conf.App.Log.HistoryType,
+			"version": conf.App.Version,
 		},
 	}
 

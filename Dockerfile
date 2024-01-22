@@ -1,7 +1,7 @@
 ############################
 # STEP 1 build executable binary
 ############################
-FROM golang:1.20-alpine AS build
+FROM golang:1.21-alpine AS build
 
 # Install git + SSL ca certificates.
 ## Git is required for fetching the dependencies.
@@ -9,20 +9,20 @@ FROM golang:1.20-alpine AS build
 RUN apk update && apk add --no-cache git ca-certificates tzdata && update-ca-certificates
 
 # Set docker environment
-ARG wavve_env
+ARG env
 ARG GITLAB_USER
 ARG GITLAB_PASSWORD
 
 # For get private gitlab repository
-RUN echo "machine gitlab.wavve.com login ${GITLAB_USER} password ${GITLAB_PASSWORD}" > ~/.netrc && chmod 600 ~/.netrc
+RUN echo "machine gitlab.com login ${GITLAB_USER} password ${GITLAB_PASSWORD}" > ~/.netrc && chmod 600 ~/.netrc
 
 # Set Golang Env
 ENV GO111MODULE=on \
     CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64 \
-    wavve_env=${wavve_env} \
-    GOPRIVATE=gitlab.wavve.com
+    env=${env} \
+    GOPRIVATE=gitlab.com
 
 WORKDIR /go-app
 

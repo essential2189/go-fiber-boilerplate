@@ -1,31 +1,38 @@
 package main
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"go-boilerplate/app"
+	"go-boilerplate/app/core"
 	"go-boilerplate/app/core/helper"
 	"go-boilerplate/app/core/helper/logger"
 	"go-boilerplate/app/domain/temp"
+	"go-boilerplate/app/domain/wallet"
 	"go-boilerplate/config"
-
-	"github.com/gofiber/fiber/v2"
 	"go.uber.org/fx"
 )
 
 // @title go-boilerplate API
 // @version 1.0
-// @contact.name 프로덕트 도메인
-// @contact.email product.domain.tech@wavve.com
 // @host localhost:8080
 // @accept application/json
 // @produce application/json
 func main() {
 	fx.New(
-		temp.ControllerModule,
-		temp.ServiceModule,
-		temp.RepositoryModule,
-
 		config.Module,
 		helper.Module,
+
+		core.RepositoryModule,
+		core.ClientModule,
+		core.BaseModule,
+
+		temp.ControllerModule,
+		temp.ServiceModule,
+
+		wallet.ControllerModule,
+		wallet.ServiceModule,
+		wallet.RepositoryModule,
+
 		fx.Provide(
 			app.NewFiber,
 			fx.Annotate(

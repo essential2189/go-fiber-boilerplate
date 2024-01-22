@@ -1,41 +1,31 @@
 package exception
 
 import (
-	"go-boilerplate/app/core/helper/logger"
+	"errors"
 	"go-boilerplate/app/core/helper/sentry"
+	"strconv"
+	"strings"
 
-	"github.com/cockroachdb/errors"
 	"github.com/gofiber/fiber/v2"
-	"gorm.io/gorm"
 )
 
-func ErrorHandler(c *fiber.Ctx, originErr error) error {
-	// Status code defaults to 500
+func ErrorHandler(c *fiber.Ctx, err error) error {
 	code := fiber.StatusInternalServerError
+	message := "Internal Server Error"
 
-	resultErr := originErr
-	if errors.Is(originErr, gorm.ErrRecordNotFound) {
-		resultErr = fiber.ErrNotFound
-	}
-
-	// Retrieve the custom status code if it's a *fiber.Error
-	var e *fiber.Error
-	if errors.As(resultErr, &e) {
-		code = e.Code
-	}
-
-	if code >= 400 {
-		logger.Zap.Errorf("%+v", originErr)
-	} else {
-		logger.Zap.Infof("%+v", originErr)
+	var customError *Error
+	ok := errors.As(err, &customError)
+	if ok {
+		code, _ = strconv.Atoi(strings.Split(string(customError.Code), ".")[0])
+		message = ErrorMessage()(customError.Code)
 	}
 
 	if r := recover(); r != nil {
 		err := r.(error)
 		// CHECK api error type sentry capture
 		sentry.CaptureException(c, err)
-		return c.Status(code).JSON(map[string]string{"error": err.Error()})
+		return c.Status(code).JSON(fiber.Map{"code": customError.Code, "message": message, "data": customError.Data})
 	}
 
-	return c.Status(code).JSON(map[string]string{"error": resultErr.Error()})
+	return c.Status(code).JSON(fiber.Map{"error": code, "message": message, "data": customError.Data})
 }

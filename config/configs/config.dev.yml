@@ -1,0 +1,33 @@
+server:
+  profile: dev
+  port: 8080
+
+app:
+  version: '1.0.0'
+  url:
+    billing:
+      base-url: ''
+  log:
+    level: 'debug'
+    history-type: 'history'
+
+infra:
+  db:
+    user:
+    password: ''
+    source_addrs:
+      - ''
+      - ''
+    dbname:
+
+  redis:
+    master_name: ''
+    sentiel_addrs:
+      - ''
+
+  kafka:
+    broker:
+      - ''
+
+  sentry:
+    dsn: ''

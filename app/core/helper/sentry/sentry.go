@@ -17,7 +17,7 @@ func CaptureException(ctx *fiber.Ctx, err error) {
 }
 
 func New(config *config.Config) fiber.Handler {
-	dsn := config.Sentry.Dsn
+	dsn := config.Infra.Sentry.Dsn
 
 	log.Println("sentry initializing... dsn is : ", dsn)
 	err := _sentry.Init(getOptions(dsn))

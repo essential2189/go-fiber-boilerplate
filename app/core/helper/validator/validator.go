@@ -4,6 +4,7 @@ import (
 	"github.com/cockroachdb/errors"
 	"github.com/go-playground/validator/v10"
 	"github.com/hashicorp/go-multierror"
+	"go-boilerplate/app/core/helper/validator/custom"
 )
 
 type Checker struct {
@@ -11,7 +12,9 @@ type Checker struct {
 }
 
 func New() *Checker {
-	return &Checker{validator.New()}
+	v := &Checker{validator.New()}
+	v.registerValidation()
+	return v
 }
 
 func (v *Checker) Struct(data interface{}) error {
@@ -23,4 +26,13 @@ func (v *Checker) Struct(data interface{}) error {
 		}
 	}
 	return errors.WithStack(result)
+}
+
+func (v *Checker) registerValidation() {
+	for k, f := range custom.ValidationMapper {
+		err := v.RegisterValidation(k, f)
+		if err != nil {
+			panic(err)
+		}
+	}
 }

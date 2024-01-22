@@ -18,7 +18,7 @@ import (
 // NewMaria opens a database connection.
 func NewMaria(config *config.Config) *gorm.DB {
 	gormConfig := newGormConfig()
-	sources, replicas := getDialectors(config.DB)
+	sources, replicas := getDialectors(config.Infra.DB)
 
 	db, err := gorm.Open(sources[0], gormConfig)
 	if err != nil {

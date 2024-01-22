@@ -1,16 +1,40 @@
 package config
 
 type Config struct {
-	Log    Log    `mapstructure:"log"`
+	Server Server `mapstructure:"server"`
+	App    App    `mapstructure:"app"`
+	Infra  Infra  `mapstructure:"infra"`
+}
+
+type Server struct {
+	Profile string `mapstructure:"profile"`
+	Port    string `mapstructure:"port"`
+}
+
+type App struct {
+	Version string `mapstructure:"version"`
+
+	Url Url `mapstructure:"url"`
+
+	Log Log `mapstructure:"log"`
+}
+
+type Infra struct {
 	DB     DB     `mapstructure:"db"`
+	Redis  Redis  `mapstructure:"redis"`
 	Kafka  Kafka  `mapstructure:"kafka"`
-	Redis  Redis  `mapstructure:"kafka"`
 	Sentry Sentry `mapstructure:"sentry"`
 }
 
+type Url struct {
+	Billing struct {
+		BaseUrl string `mapstructure:"base-url"`
+	} `mapstructure:"billing"`
+}
+
 type Log struct {
-	HistoryType string `mapstructure:"history_type"`
-	Version     string `mapstructure:"version"`
+	Level       string `mapstructure:"level"`
+	HistoryType string `mapstructure:"history-type"`
 }
 
 type DB struct {

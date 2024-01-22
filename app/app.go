@@ -3,13 +3,14 @@ package app
 import (
 	"context"
 	"fmt"
+	"github.com/gofiber/fiber/v2"
 	"go-boilerplate/app/core/exception"
 	"go-boilerplate/app/core/helper/logger"
 	"go-boilerplate/config"
 	"net/http"
 
-	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/gofiber/fiber/v2/middleware/requestid"
 	"github.com/gofiber/swagger"
 	"go.uber.org/fx"
@@ -17,14 +18,14 @@ import (
 )
 
 // NewFiber create a new Fiber application
-func NewFiber(lc fx.Lifecycle) *fiber.App {
+func NewFiber(lc fx.Lifecycle, c *config.Config) *fiber.App {
 	app := initializeFiber()
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			logger.Zap.Infof("Server is starting on port: %s", config.Port)
+			logger.Zap.Infof("Server is starting on port: %s", c.Server.Port)
 
-			addr := fmt.Sprintf(":%s", config.Port)
+			addr := fmt.Sprintf(":%s", c.Server.Port)
 			go app.Listen(addr)
 			return nil
 		},
@@ -39,7 +40,7 @@ func NewFiber(lc fx.Lifecycle) *fiber.App {
 func initializeFiber() *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:       "go-boilerplate",
-		ServerHeader:  "fiber",
+		ServerHeader:  "go-boilerplate",
 		Prefork:       false, // This will spawn multiple Go processes listening on the same port.
 		CaseSensitive: true,  // When disabled, /Foo and /foo are treated the same.
 		StrictRouting: true,  // When disabled, the router treats /foo and /foo/ as the same.
@@ -52,6 +53,7 @@ func initializeFiber() *fiber.App {
 }
 
 func setMiddleware(app *fiber.App) *fiber.App {
+	app.Use(recover.New())
 	app.Use(cors.New())
 	// Set request ID
 	app.Use(requestid.New(requestid.Config{

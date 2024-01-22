@@ -23,7 +23,7 @@ func NewKafkaProducer(config *config.Config) *Producer {
 	conf.Producer.RequiredAcks = sarama.WaitForLocal
 	conf.Producer.Compression = sarama.CompressionNone // CHECK 관련 여쭤보기
 	conf.Producer.Partitioner = sarama.NewRoundRobinPartitioner
-	async, err := sarama.NewAsyncProducer(config.Kafka.Broker, conf)
+	async, err := sarama.NewAsyncProducer(config.Infra.Kafka.Broker, conf)
 	if err != nil {
 		logger.Zap.Fatalf("NewKafkaProducer NewAsyncProducer error %v", err)
 	}
@@ -33,7 +33,7 @@ func NewKafkaProducer(config *config.Config) *Producer {
 	syncConf.Version = sarama.V0_11_0_0
 	syncConf.Producer.Retry.Max = 3
 	syncConf.Producer.Partitioner = sarama.NewRoundRobinPartitioner
-	sync, err := sarama.NewSyncProducer(config.Kafka.Broker, syncConf)
+	sync, err := sarama.NewSyncProducer(config.Infra.Kafka.Broker, syncConf)
 	if err != nil {
 		logger.Zap.Fatalf("NewKafkaProducer NewSyncProducer error %v", err)
 	}
@@ -43,7 +43,7 @@ func NewKafkaProducer(config *config.Config) *Producer {
 	mostOnceConf.Producer.Return.Successes = false
 	mostOnceConf.Producer.Return.Errors = false
 	mostOnceConf.Producer.RequiredAcks = sarama.NoResponse
-	mostOnce, err := sarama.NewAsyncProducer(config.Kafka.Broker, mostOnceConf)
+	mostOnce, err := sarama.NewAsyncProducer(config.Infra.Kafka.Broker, mostOnceConf)
 	if err != nil {
 		logger.Zap.Fatalf("NewKafkaProducer MostOnceProducer error %v", err)
 	}

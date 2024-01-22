@@ -10,7 +10,7 @@ import (
 
 func NewRedis(config *config.Config) *redis.Client {
 	ctx := context.Background()
-	c := config.Redis
+	c := config.Infra.Redis
 	conn := redis.NewFailoverClient(&redis.FailoverOptions{
 		MasterName:    c.MasterName,
 		SentinelAddrs: c.SentinelAddrs,

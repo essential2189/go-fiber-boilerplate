@@ -10,5 +10,5 @@ const (
 )
 
 const (
-	WavveCredentialHeader = "Wavve-Credential"
+	CredentialHeader = "credential"
 )

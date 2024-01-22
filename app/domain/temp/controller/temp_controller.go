@@ -2,42 +2,50 @@ package controller
 
 import (
 	"go-boilerplate/app"
+	"go-boilerplate/app/core"
 	"go-boilerplate/app/core/consts"
 	"go-boilerplate/app/core/helper"
 	"go-boilerplate/app/core/helper/logger"
 	"go-boilerplate/app/core/helper/resty"
+	"go-boilerplate/app/domain/temp/service"
 	"net/http"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-type Controller interface {
+type TempController interface {
 	Table() []app.Mapping
 	Temp(c *fiber.Ctx) error
+	Test(c *fiber.Ctx) error
 }
 
-type controller struct {
-	helper helper.Helper
+type tempController struct {
+	core    core.Modules
+	helper  helper.Helper
+	service service.TempService
 }
 
-func NewController(h helper.Helper) Controller {
-	return controller{
-		helper: h,
+func NewTempController(core core.Modules, helper helper.Helper, service service.TempService) TempController {
+	return tempController{
+		core:    core,
+		helper:  helper,
+		service: service,
 	}
 }
 
-func (ctrl controller) Table() []app.Mapping {
+func (ctrl tempController) Table() []app.Mapping {
 	return []app.Mapping{
 		{fiber.MethodGet, "/temp", ctrl.Temp},
+		{fiber.MethodGet, "/test", ctrl.Test},
 	}
 }
 
-func (ctrl controller) Temp(c *fiber.Ctx) error {
+func (ctrl tempController) Temp(c *fiber.Ctx) error {
 	requestInfo := resty.RequestInfo{
-		Uri:          "http://wavve-apis/platform/accesscheck?apikey=E5F3E0D30947AA5440556471321BB6D9&device=none&partner=none&pooqzone=none&region=none&drm=none&targetage=none'",
+		Uri:          "http://apis/accesscheck'",
 		Method:       resty.MethodGET,
-		Headers:      map[string]string{"Content-Type": "application/json", consts.WavveCredentialHeader: "SiOCXq35eH2tsR2Mp7479lt/RBia2ksDbYCmgl/I1MDYd9GqrKePTy1sWC8wx4Y1tKJcodH7e6eIOscEO+M5TNZcaf3HtokBhBGoTYF1Voq9oA463XGJriAt370dIfXpDWc18Go2NXIIX8D/pzI+uoWFb6rwNpCZ7cYrF3qikmVB5TLxbt3QTfp7SqZoIbRoKNE9rH3VEwcbXJPnckTeJqs1QVV6xtoanUmDB53YVwFUmoy9F3L4FnE3ywWoMfrfrt8FVWzK/+dpFareWXgqKyeKBz42rdH8Dviy30dEXRexRG/GwlG3jl34YMO2eGL0w7kl6m2+8juR6ameIaKImw=="},
+		Headers:      map[string]string{"Content-Type": "application/json", consts.CredentialHeader: "asdfasdf"},
 		Query:        map[string]string{},
 		Body:         nil,
 		Timeout:      0,
@@ -48,5 +56,13 @@ func (ctrl controller) Temp(c *fiber.Ctx) error {
 	res, _ := ctrl.helper.Resty.Request(requestInfo)
 
 	logger.Zap.Infof("res: " + strconv.Itoa(res.StatusCode))
+	return c.SendStatus(http.StatusOK)
+}
+
+func (ctrl tempController) Test(c *fiber.Ctx) error {
+	err := ctrl.service.Test()
+	if err != nil {
+		return err
+	}
 	return c.SendStatus(http.StatusOK)
 }

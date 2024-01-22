@@ -18,12 +18,12 @@ go version - 1.2.1
 
 #### Run
 
-env : `APP_HOME`, `DEBUG`, `TEST`, `wavve_env`, `wavve_port`
+env : `APP_HOME`, `DEBUG`, `TEST`, `env`, `port`
 
-- `wavve_env=dev air` - Run the server with hot reload
+- `env=dev air` - Run the server with hot reload
 - `swag init` - Generate swagger docs
 - `docker build -t go-boilerplate .` - Build docker image
-- `docker run -e "wavve_env=dev" -p 8080:8080 go-boilerplate` - Run docker image
+- `docker run -e "env=dev" -p 8080:8080 go-boilerplate` - Run docker image
 
 ### Library
 
