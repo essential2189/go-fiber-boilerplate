@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"encoding/json"
+	"go-boilerplate/app/core/exception"
 	"os"
 	"strconv"
 	"sync"
@@ -194,7 +196,12 @@ func NewMiddleware(config ...Config) fiber.Handler {
 				fields = append(fields, zap.String("requestId", c.GetRespHeader(fiber.HeaderXRequestID)))
 			case "error":
 				if chainErr != nil {
-					fields = append(fields, zap.String("error", chainErr.Error()))
+					var log exception.ErrorLog
+					if err = json.Unmarshal([]byte(chainErr.Error()), &log); err != nil {
+						fields = append(fields, zap.String("error", chainErr.Error()))
+					} else {
+						fields = append(fields, zap.Reflect("error", log))
+					}
 				}
 			case "reqHeaders":
 				//c.Request().Header.VisitAll(func(k, v []byte) {

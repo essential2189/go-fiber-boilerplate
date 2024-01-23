@@ -81,7 +81,7 @@ func setMiddleware(app *fiber.App) *fiber.App {
 			logger.Protocol,
 			logger.ReqHeaders,
 		},
-		Levels: []zapcore.Level{zapcore.ErrorLevel, zapcore.ErrorLevel, zapcore.InfoLevel},
+		Levels: []zapcore.Level{zapcore.ErrorLevel, zapcore.WarnLevel, zapcore.InfoLevel},
 	}))
 
 	return app

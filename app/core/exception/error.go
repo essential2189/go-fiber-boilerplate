@@ -1,7 +1,7 @@
 package exception
 
 import (
-	"fmt"
+	"encoding/json"
 )
 
 type Error struct {
@@ -16,8 +16,24 @@ type ErrorResponse struct {
 	Data    interface{} `json:"data"`
 }
 
+type ErrorLog struct {
+	Code    string      `json:"code"`
+	Message string      `json:"message"`
+	Error   string      `json:"error"`
+	Data    interface{} `json:"data"`
+}
+
 func (e *Error) Error() string {
-	return fmt.Sprintf("code: %s, message: %s, error: %s, data: %+v", e.Code, ErrorMessage()(e.Code), e.Err.Error(), e.Data)
+	log := ErrorLog{
+		Code:    string(e.Code),
+		Message: ErrorMessage()(e.Code),
+		Error:   e.Err.Error(),
+		Data:    e.Data,
+	}
+
+	jsonBytes, _ := json.Marshal(log)
+
+	return string(jsonBytes)
 }
 
 func Wrap(code errorCode, err error, data interface{}) *Error {

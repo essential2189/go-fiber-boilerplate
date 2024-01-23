@@ -3,7 +3,7 @@ package exception
 type errorCode string
 
 const (
-	ErrBadRequest errorCode = "400.001"
+	ErrBadRequest errorCode = "400.000"
 	// TODO: add more error codes
 )
 
