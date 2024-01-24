@@ -1,19 +1,14 @@
 package exception
 
-type errorCode string
+import "go-boilerplate/app/core/exception/errcode"
 
-const (
-	ErrBadRequest errorCode = "400.000"
-	// TODO: add more error codes
-)
-
-func ErrorMessage() func(errorCode) string {
-	errorMessages := map[errorCode]string{
-		ErrBadRequest: "Bad Request",
+func ErrorMessage() func(errcode.ErrorCode) string {
+	errorMessages := map[errcode.ErrorCode]string{
+		errcode.ErrBadRequest: "Bad Request",
 		// TODO: add more error messages
 	}
 
-	return func(key errorCode) string {
+	return func(key errcode.ErrorCode) string {
 		return errorMessages[key]
 	}
 }

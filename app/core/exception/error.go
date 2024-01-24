@@ -2,10 +2,11 @@ package exception
 
 import (
 	"encoding/json"
+	"go-boilerplate/app/core/exception/errcode"
 )
 
 type Error struct {
-	Code errorCode
+	Code errcode.ErrorCode
 	Err  error
 	Data interface{}
 }
@@ -36,7 +37,18 @@ func (e *Error) Error() string {
 	return string(jsonBytes)
 }
 
-func Wrap(code errorCode, err error, data interface{}) *Error {
+func Wrap(code errcode.ErrorCode, err error) *Error {
+	if err == nil {
+		return nil
+	}
+
+	return &Error{
+		Code: code,
+		Err:  err,
+	}
+}
+
+func WithData(code errcode.ErrorCode, err error, data interface{}) *Error {
 	if err == nil {
 		return nil
 	}
