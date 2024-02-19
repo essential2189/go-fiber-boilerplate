@@ -3,6 +3,7 @@ package exception
 import (
 	"encoding/json"
 	"go-boilerplate/app/core/exception/errcode"
+	"reflect"
 )
 
 type Error struct {
@@ -37,8 +38,8 @@ func (e *Error) Error() string {
 	return string(jsonBytes)
 }
 
-func Wrap(code errcode.ErrorCode, err error) *Error {
-	if err == nil {
+func Wrap(code errcode.ErrorCode, err error) error {
+	if err == nil || (reflect.ValueOf(err).Kind() == reflect.Ptr && reflect.ValueOf(err).IsNil()) {
 		return nil
 	}
 
@@ -48,8 +49,8 @@ func Wrap(code errcode.ErrorCode, err error) *Error {
 	}
 }
 
-func WithData(code errcode.ErrorCode, err error, data interface{}) *Error {
-	if err == nil {
+func WithData(code errcode.ErrorCode, err error, data interface{}) error {
+	if err == nil || (reflect.ValueOf(err).Kind() == reflect.Ptr && reflect.ValueOf(err).IsNil()) {
 		return nil
 	}
 
