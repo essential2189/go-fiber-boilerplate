@@ -3,6 +3,8 @@ package base
 import (
 	"github.com/cockroachdb/errors"
 	"github.com/gofiber/fiber/v2"
+	"go-boilerplate/app/core/exception"
+	"go-boilerplate/app/core/exception/errcode"
 	"go-boilerplate/app/core/helper"
 )
 
@@ -23,17 +25,21 @@ func NewGetParameter(helper helper.Helper) Parameter {
 
 func (gp getParameter) GetRequest(ctx *fiber.Ctx, param interface{}) error {
 	if err := ctx.ParamsParser(param); err != nil {
-		return errors.Wrap(err, "invalid param")
+		return exception.WithData(errcode.InvalidParameter, err, fiber.Map{"error": err.Error()})
+	}
+
+	if err := ctx.ReqHeaderParser(param); err != nil {
+		return exception.WithData(errcode.InvalidParameter, err, fiber.Map{"error": err.Error()})
 	}
 
 	if err := ctx.QueryParser(param); err != nil {
-		return errors.Wrap(err, "invalid query")
+		return exception.WithData(errcode.InvalidParameter, err, fiber.Map{"error": err.Error()})
 	}
 
-	if ctx.Method() != fiber.MethodGet {
+	if ctx.GetReqHeaders()["Content-Type"][0] == "application/json" {
 		err := ctx.BodyParser(param)
 		if err != nil {
-			return errors.Wrap(err, "invalid body")
+			return exception.WithData(errcode.InvalidParameter, err, fiber.Map{"error": err.Error()})
 		}
 	}
 
