@@ -36,7 +36,7 @@ func (gp getParameter) GetRequest(ctx *fiber.Ctx, param interface{}) error {
 		return exception.WithData(errcode.InvalidParameter, err, fiber.Map{"error": err.Error()})
 	}
 
-	if ctx.GetReqHeaders()["Content-Type"][0] == "application/json" {
+	if ctx.GetReqHeaders()["Content-Type"] != nil && ctx.GetReqHeaders()["Content-Type"][0] == "application/json" {
 		err := ctx.BodyParser(param)
 		if err != nil {
 			return exception.WithData(errcode.InvalidParameter, err, fiber.Map{"error": err.Error()})
