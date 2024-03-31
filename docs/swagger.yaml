@@ -1,75 +1,11 @@
 consumes:
 - application/json
-definitions:
-  go-boilerplate_app_domain_wallet_dto.GetWalletListRes:
-    properties:
-      bill_status:
-        type: integer
-      currency_type:
-        description: tb_bill
-        type: integer
-      device_agent:
-        type: string
-      download_count:
-        type: integer
-      end_ts:
-        type: string
-      priority:
-        type: integer
-      renew:
-        type: integer
-      start_ts:
-        type: string
-      total_amount:
-        type: number
-      type:
-        type: integer
-      wallet_status:
-        type: integer
-      wallet_type:
-        description: tb_wallet_product
-        type: integer
-    type: object
 host: localhost:8080
 info:
   contact: {}
   title: go-boilerplate API
   version: "1.0"
-paths:
-  /v1/purchase/list/{accountId}:
-    get:
-      consumes:
-      - application/json
-      description: Get GetWalletListRes List
-      parameters:
-      - description: Account ID
-        in: path
-        name: accountId
-        required: true
-        type: integer
-      - in: query
-        minimum: 1
-        name: limit
-        required: true
-        type: integer
-      - in: query
-        name: orderBy
-        type: string
-      - in: query
-        minimum: 1
-        name: page
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/go-boilerplate_app_domain_wallet_dto.GetWalletListRes'
-      summary: Get GetWalletListRes List
-      tags:
-      - GetWalletListRes
+paths: {}
 produces:
 - application/json
 swagger: "2.0"
