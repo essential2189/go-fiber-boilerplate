@@ -4,7 +4,7 @@ import "go-boilerplate/app/core/exception/errcode"
 
 func ErrorMessage() func(errcode.ErrorCode) string {
 	errorMessages := map[errcode.ErrorCode]string{
-		errcode.ErrBadRequest: "Bad Request",
+		errcode.BadRequest: "Bad Request",
 		// TODO: add more error messages
 	}
 

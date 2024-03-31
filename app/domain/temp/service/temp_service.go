@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/cockroachdb/errors"
 	"go-boilerplate/app/core/exception"
+	"go-boilerplate/app/core/exception/errcode"
 )
 
 type TempService interface {
@@ -19,5 +20,5 @@ func NewTempService() TempService {
 func (s tempService) Test() error {
 	err := errors.New("test error")
 
-	return exception.Wrap(exception.ErrBadRequest, errors.WithStack(err), nil)
+	return exception.Wrap(errcode.BadRequest, errors.WithStack(err))
 }

@@ -7,7 +7,6 @@ import (
 	"go-boilerplate/app/core/helper"
 	"go-boilerplate/app/core/helper/logger"
 	"go-boilerplate/app/domain/temp"
-	"go-boilerplate/app/domain/wallet"
 	"go-boilerplate/config"
 	"go.uber.org/fx"
 )
@@ -28,10 +27,6 @@ func main() {
 
 		temp.ControllerModule,
 		temp.ServiceModule,
-
-		wallet.ControllerModule,
-		wallet.ServiceModule,
-		wallet.RepositoryModule,
 
 		fx.Provide(
 			app.NewFiber,
